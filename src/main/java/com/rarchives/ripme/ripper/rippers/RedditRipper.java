@@ -14,7 +14,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import com.rarchives.ripme.ripper.AlbumRipper;
-import com.rarchives.ripme.ui.UpdateUtils;
 import com.rarchives.ripme.utils.Http;
 import com.rarchives.ripme.utils.RipUtils;
 import com.rarchives.ripme.utils.Utils;
@@ -28,7 +27,7 @@ public class RedditRipper extends AlbumRipper {
     private static final String HOST   = "reddit";
     private static final String DOMAIN = "reddit.com";
 
-    private static final String REDDIT_USER_AGENT = "RipMe:github.com/RipMeApp/ripme:" + UpdateUtils.getThisJarVersion() + " (by /u/metaprime and /u/ineedmorealts)";
+    private static final String REDDIT_USER_AGENT = "RipMe:github.com/RipMeApp/ripme:" + Utils.IMPLEMENTATION_VERSION + " (by /u/metaprime and /u/ineedmorealts)";
 
     private static final int SLEEP_TIME = 2000;
 

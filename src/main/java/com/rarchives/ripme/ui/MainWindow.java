@@ -103,8 +103,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
     // Configuration
     private static JButton optionConfiguration;
     private static JPanel configurationPanel;
-    private static JButton configUpdateButton;
-    private static JLabel configUpdateLabel;
     private static JTextField configTimeoutText;
     private static JTextField configThreadsText;
     private static JCheckBox configOverwriteCheckbox;
@@ -176,7 +174,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
     }
 
     public MainWindow() {
-        mainFrame = new JFrame("RipMe v" + UpdateUtils.getThisJarVersion());
+        mainFrame = new JFrame(Utils.IMPLEMENTATION_TITLE + " v" + Utils.IMPLEMENTATION_VERSION);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setLayout(new GridBagLayout());
 
@@ -189,21 +187,9 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         Thread shutdownThread = new Thread(this::shutdownCleanup);
         Runtime.getRuntime().addShutdownHook(shutdownThread);
 
-        if (Utils.getConfigBoolean("auto.update", true)) {
-            upgradeProgram();
-        }
-
         boolean autoripEnabled = Utils.getConfigBoolean("clipboard.autorip", false);
         ClipboardUtils.setClipboardAutoRip(autoripEnabled);
         trayMenuAutorip.setState(autoripEnabled);
-    }
-
-    private void upgradeProgram() {
-        if (!configurationPanel.isVisible()) {
-            optionConfiguration.doClick();
-        }
-        Runnable r = () -> UpdateUtils.updateProgramGUI(configUpdateLabel);
-        new Thread(r).start();
     }
 
     public void run() {
@@ -507,9 +493,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         configurationPanel.setBorder(emptyBorder);
         configurationPanel.setVisible(false);
         // TODO Configuration components
-        configUpdateButton = new JButton(Utils.getLocalizedString("check.for.updates"));
-        configUpdateLabel = new JLabel(
-                Utils.getLocalizedString("current.version") + ": " + UpdateUtils.getThisJarVersion(), JLabel.RIGHT);
         configThreadsLabel = new JLabel(Utils.getLocalizedString("max.download.threads") + ":", JLabel.RIGHT);
         configTimeoutLabel = new JLabel(Utils.getLocalizedString("timeout.mill"), JLabel.RIGHT);
         configRetriesLabel = new JLabel(Utils.getLocalizedString("retry.download.count"), JLabel.RIGHT);
@@ -557,19 +540,18 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         configSaveDirLabel.setHorizontalAlignment(JLabel.RIGHT);
         configSaveDirButton = new JButton(Utils.getLocalizedString("select.save.dir") + "...");
 
-        addItemToConfigGridBagConstraints(gbc, 0, configUpdateLabel, configUpdateButton);
-        addItemToConfigGridBagConstraints(gbc, 1, configAutoupdateCheckbox, configLogLevelCombobox);
-        addItemToConfigGridBagConstraints(gbc, 2, configThreadsLabel, configThreadsText);
-        addItemToConfigGridBagConstraints(gbc, 3, configTimeoutLabel, configTimeoutText);
-        addItemToConfigGridBagConstraints(gbc, 4, configRetriesLabel, configRetriesText);
-        addItemToConfigGridBagConstraints(gbc, 5, configOverwriteCheckbox, configSaveOrderCheckbox);
-        addItemToConfigGridBagConstraints(gbc, 6, configPlaySound, configSaveLogs);
-        addItemToConfigGridBagConstraints(gbc, 7, configShowPopup, configSaveURLsOnly);
-        addItemToConfigGridBagConstraints(gbc, 8, configClipboardAutorip, configSaveAlbumTitles);
-        addItemToConfigGridBagConstraints(gbc, 9, configSaveDescriptions, configPreferMp4);
-        addItemToConfigGridBagConstraints(gbc, 10, configWindowPosition, configURLHistoryCheckbox);
-        addItemToConfigGridBagConstraints(gbc, 11, configSelectLangComboBox, configUrlFileChooserButton);
-        addItemToConfigGridBagConstraints(gbc, 12, configSaveDirLabel, configSaveDirButton);
+        addItemToConfigGridBagConstraints(gbc, 0, configAutoupdateCheckbox, configLogLevelCombobox);
+        addItemToConfigGridBagConstraints(gbc, 1, configThreadsLabel, configThreadsText);
+        addItemToConfigGridBagConstraints(gbc, 2, configTimeoutLabel, configTimeoutText);
+        addItemToConfigGridBagConstraints(gbc, 3, configRetriesLabel, configRetriesText);
+        addItemToConfigGridBagConstraints(gbc, 4, configOverwriteCheckbox, configSaveOrderCheckbox);
+        addItemToConfigGridBagConstraints(gbc, 5, configPlaySound, configSaveLogs);
+        addItemToConfigGridBagConstraints(gbc, 6, configShowPopup, configSaveURLsOnly);
+        addItemToConfigGridBagConstraints(gbc, 7, configClipboardAutorip, configSaveAlbumTitles);
+        addItemToConfigGridBagConstraints(gbc, 8, configSaveDescriptions, configPreferMp4);
+        addItemToConfigGridBagConstraints(gbc, 9, configWindowPosition, configURLHistoryCheckbox);
+        addItemToConfigGridBagConstraints(gbc, 10, configSelectLangComboBox, configUrlFileChooserButton);
+        addItemToConfigGridBagConstraints(gbc, 11, configSaveDirLabel, configSaveDirButton);
 
         emptyPanel = new JPanel();
         emptyPanel.setPreferredSize(new Dimension(0, 0));
@@ -653,8 +635,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
 
     private void changeLocale() {
         statusLabel.setText(Utils.getLocalizedString("inactive"));
-        configUpdateButton.setText(Utils.getLocalizedString("check.for.updates"));
-        configUpdateLabel.setText(Utils.getLocalizedString("current.version") + ": " + UpdateUtils.getThisJarVersion());
         configThreadsLabel.setText(Utils.getLocalizedString("max.download.threads"));
         configTimeoutLabel.setText(Utils.getLocalizedString("timeout.mill"));
         configRetriesLabel.setText(Utils.getLocalizedString("retry.download.count"));
@@ -865,10 +845,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
 
                         "RipMe Error", JOptionPane.ERROR_MESSAGE);
             }
-        });
-        configUpdateButton.addActionListener(arg0 -> {
-            Thread t = new Thread(() -> UpdateUtils.updateProgramGUI(configUpdateLabel));
-            t.start();
         });
         configLogLevelCombobox.addActionListener(arg0 -> {
             String level = ((JComboBox) arg0.getSource()).getSelectedItem().toString();
@@ -1274,7 +1250,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         }
         if (!failed) {
             try {
-                mainFrame.setTitle("Ripping - RipMe v" + UpdateUtils.getThisJarVersion());
+                mainFrame.setTitle("Ripping - "+Utils.IMPLEMENTATION_TITLE+" v" + Utils.IMPLEMENTATION_VERSION);
                 status("Starting rip...");
                 ripper.setObserver(this);
                 Thread t = new Thread(ripper);
@@ -1445,7 +1421,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
             File f = rsc.dir;
             String prettyFile = Utils.shortenPath(f);
             openButton.setText(Utils.getLocalizedString("open") + prettyFile);
-            mainFrame.setTitle("RipMe v" + UpdateUtils.getThisJarVersion());
+            mainFrame.setTitle(Utils.IMPLEMENTATION_TITLE + " v" + Utils.IMPLEMENTATION_VERSION);
             try {
                 Image folderIcon = ImageIO.read(getClass().getClassLoader().getResource("folder.png"));
                 openButton.setIcon(new ImageIcon(folderIcon));
@@ -1453,8 +1429,8 @@ public final class MainWindow implements Runnable, RipStatusHandler {
             }
             /*
              * content key %path% the path to the album folder %url% is the album url
-             * 
-             * 
+             *
+             *
              */
             if (Utils.getConfigBoolean("enable.finish.command", false)) {
                 try {

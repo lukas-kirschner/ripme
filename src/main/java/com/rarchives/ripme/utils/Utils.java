@@ -60,7 +60,8 @@ public class Utils {
     private static final String OS = System.getProperty("os.name").toLowerCase();
     private static final Logger LOGGER = Logger.getLogger(Utils.class);
     private static final int SHORTENED_PATH_LENGTH = 12;
-    private static final String IMPLEMENTATION_TITLE = App.class.getPackage().getImplementationTitle();
+    public static final String IMPLEMENTATION_TITLE = App.class.getPackage().getImplementationTitle();
+    public static final String IMPLEMENTATION_VERSION = App.class.getPackage().getImplementationVersion();
 
     private static PropertiesConfiguration config;
     private static HashMap<String, HashMap<String, String>> cookieCache;
@@ -290,6 +291,7 @@ public class Utils {
         try {
             return getJarDirectory().getCanonicalPath();
         } catch (Exception e) {
+            e.printStackTrace();
             return ".";
         }
     }

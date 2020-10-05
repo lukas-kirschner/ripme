@@ -30,7 +30,6 @@ import com.rarchives.ripme.ripper.AbstractRipper;
 import com.rarchives.ripme.ui.History;
 import com.rarchives.ripme.ui.HistoryEntry;
 import com.rarchives.ripme.ui.MainWindow;
-import com.rarchives.ripme.ui.UpdateUtils;
 import com.rarchives.ripme.utils.Proxy;
 import com.rarchives.ripme.utils.RipUtils;
 import com.rarchives.ripme.utils.Utils;
@@ -58,7 +57,7 @@ public class App {
         CommandLine cl = getArgs(args);
 
         if (args.length > 0 && cl.hasOption('v')){
-            logger.info(UpdateUtils.getThisJarVersion());
+            logger.info(Utils.IMPLEMENTATION_VERSION);
             System.exit(0);
         }
 
@@ -84,7 +83,7 @@ public class App {
 
             Utils.configureLogger();
 
-            logger.info("Initialized ripme v" + UpdateUtils.getThisJarVersion());
+            logger.info("Initialized " + Utils.IMPLEMENTATION_TITLE + " v" + Utils.IMPLEMENTATION_VERSION);
 
             MainWindow mw = new MainWindow();
             SwingUtilities.invokeLater(mw);
@@ -133,7 +132,7 @@ public class App {
         }
 
         Utils.configureLogger();
-        logger.info("Initialized ripme v" + UpdateUtils.getThisJarVersion());
+        logger.info("Initialized " + Utils.IMPLEMENTATION_TITLE + " v" + Utils.IMPLEMENTATION_VERSION);
 
         //Set history file
         if (cl.hasOption('H')) {
@@ -141,7 +140,7 @@ public class App {
             Utils.setConfigString("history.location", historyLocation);
             logger.info("Set history file to " + historyLocation);
         }
-        
+
         //Allow file overwriting
         if (cl.hasOption('w')) {
             Utils.setConfigBoolean("file.overwrite", true);
@@ -279,10 +278,6 @@ public class App {
             ripURL(url, !cl.hasOption("n"));
         }
 
-        if (cl.hasOption('j')) {
-            UpdateUtils.updateProgramCLI();
-        }
-
     }
 
     /**
@@ -325,7 +320,6 @@ public class App {
         opts.addOption("v", "version", false, "Show current version");
         opts.addOption("s", "socks-server", true, "Use socks server ([user:password]@host[:port])");
         opts.addOption("p", "proxy-server", true, "Use HTTP Proxy server ([user:password]@host[:port])");
-        opts.addOption("j", "update", false, "Update ripme");
         opts.addOption("a","append-to-folder", true, "Append a string to the output folder name");
         opts.addOption("H", "history", true, "Set history file location.");
         return opts;
@@ -386,7 +380,7 @@ public class App {
         }
     }
 
-    /* 
+    /*
     * @see MainWindow.saveHistory
     */
     private static void saveHistory() {
