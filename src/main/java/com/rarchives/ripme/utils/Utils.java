@@ -39,6 +39,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.LineEvent;
 
+import com.rarchives.ripme.App;
 import com.rarchives.ripme.ripper.AbstractRipper;
 
 import org.apache.commons.configuration.ConfigurationException;
@@ -59,6 +60,7 @@ public class Utils {
     private static final String OS = System.getProperty("os.name").toLowerCase();
     private static final Logger LOGGER = Logger.getLogger(Utils.class);
     private static final int SHORTENED_PATH_LENGTH = 12;
+    private static final String IMPLEMENTATION_TITLE = App.class.getPackage().getImplementationTitle();
 
     private static PropertiesConfiguration config;
     private static HashMap<String, HashMap<String, String>> cookieCache;
@@ -221,14 +223,14 @@ public class Utils {
      * Gets the directory of where the config file is stored on a Windows machine.
      */
     private static String getWindowsConfigDir() {
-        return System.getenv("LOCALAPPDATA") + File.separator + "ripme";
+        return System.getenv("LOCALAPPDATA") + File.separator + IMPLEMENTATION_TITLE;
     }
 
     /**
      * Gets the directory of where the config file is stored on a UNIX machine.
      */
     private static String getUnixConfigDir() {
-        return System.getProperty("user.home") + File.separator + ".config" + File.separator + "ripme";
+        return System.getProperty("user.home") + File.separator + ".config" + File.separator + IMPLEMENTATION_TITLE;
     }
 
     /**
@@ -236,7 +238,7 @@ public class Utils {
      */
     private static String getMacOSConfigDir() {
         return System.getProperty("user.home") + File.separator + "Library" + File.separator + "Application Support"
-                + File.separator + "ripme";
+                + File.separator + IMPLEMENTATION_TITLE;
     }
 
     private static File getJarDirectory() {
