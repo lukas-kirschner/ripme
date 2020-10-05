@@ -121,6 +121,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
     private static JCheckBox configClipboardAutorip;
     private static JCheckBox configSaveDescriptions;
     private static JCheckBox configPreferMp4;
+    private static JCheckBox configDownloadPhotosOnly;
     private static JCheckBox configWindowPosition;
     private static JComboBox<String> configSelectLangComboBox;
     private static JLabel configThreadsLabel;
@@ -215,6 +216,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         Utils.setConfigBoolean("clipboard.autorip", configClipboardAutorip.isSelected());
         Utils.setConfigBoolean("descriptions.save", configSaveDescriptions.isSelected());
         Utils.setConfigBoolean("prefer.mp4", configPreferMp4.isSelected());
+        Utils.setConfigBoolean("photos.only", configDownloadPhotosOnly.isSelected());
         Utils.setConfigBoolean("remember.url_history", configURLHistoryCheckbox.isSelected());
         Utils.setConfigString("lang", configSelectLangComboBox.getSelectedItem().toString());
         saveWindowPosition(mainFrame);
@@ -516,6 +518,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         configSaveDescriptions = addNewCheckbox(Utils.getLocalizedString("save.descriptions"), "descriptions.save",
                 true);
         configPreferMp4 = addNewCheckbox(Utils.getLocalizedString("prefer.mp4.over.gif"), "prefer.mp4", false);
+        configDownloadPhotosOnly = addNewCheckbox(Utils.getLocalizedString("download.photos.only"), "photos.only", false);
         configWindowPosition = addNewCheckbox(Utils.getLocalizedString("restore.window.position"), "window.position",
                 true);
         configURLHistoryCheckbox = addNewCheckbox(Utils.getLocalizedString("remember.url.history"),
@@ -549,9 +552,10 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         addItemToConfigGridBagConstraints(gbc, 6, configShowPopup, configSaveURLsOnly);
         addItemToConfigGridBagConstraints(gbc, 7, configClipboardAutorip, configSaveAlbumTitles);
         addItemToConfigGridBagConstraints(gbc, 8, configSaveDescriptions, configPreferMp4);
-        addItemToConfigGridBagConstraints(gbc, 9, configWindowPosition, configURLHistoryCheckbox);
-        addItemToConfigGridBagConstraints(gbc, 10, configSelectLangComboBox, configUrlFileChooserButton);
-        addItemToConfigGridBagConstraints(gbc, 11, configSaveDirLabel, configSaveDirButton);
+        addItemToConfigGridBagConstraints(gbc, 9, new JCheckBox("Dummy"), configDownloadPhotosOnly);
+        addItemToConfigGridBagConstraints(gbc, 10, configWindowPosition, configURLHistoryCheckbox);
+        addItemToConfigGridBagConstraints(gbc, 11, configSelectLangComboBox, configUrlFileChooserButton);
+        addItemToConfigGridBagConstraints(gbc, 12, configSaveDirLabel, configSaveDirButton);
 
         emptyPanel = new JPanel();
         emptyPanel.setPreferredSize(new Dimension(0, 0));
@@ -651,6 +655,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         configUrlFileChooserButton.setText(Utils.getLocalizedString("download.url.list"));
         configSaveDirButton.setText(Utils.getLocalizedString("select.save.dir") + "...");
         configPreferMp4.setText(Utils.getLocalizedString("prefer.mp4.over.gif"));
+        configDownloadPhotosOnly.setText(Utils.getLocalizedString("download.photos.only"));
         configWindowPosition.setText(Utils.getLocalizedString("restore.window.position"));
         configURLHistoryCheckbox.setText(Utils.getLocalizedString("remember.url.history"));
         optionLog.setText(Utils.getLocalizedString("Log"));
@@ -923,6 +928,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         addCheckboxListener(configSaveAlbumTitles, "album_titles.save");
         addCheckboxListener(configSaveDescriptions, "descriptions.save");
         addCheckboxListener(configPreferMp4, "prefer.mp4");
+        addCheckboxListener(configDownloadPhotosOnly, "photos.only");
         addCheckboxListener(configWindowPosition, "window.position");
 
         configClipboardAutorip.addActionListener(arg0 -> {
