@@ -1,5 +1,9 @@
 package com.rarchives.ripme.ripper;
 
+import com.rarchives.ripme.ui.RipStatusMessage;
+import com.rarchives.ripme.ui.RipStatusMessage.STATUS;
+import com.rarchives.ripme.utils.Utils;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,13 +13,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.rarchives.ripme.ui.RipStatusMessage;
-import com.rarchives.ripme.ui.RipStatusMessage.STATUS;
-import com.rarchives.ripme.utils.Utils;
-
 // Should this file even exist? It does the same thing as abstractHTML ripper
 
-/**'
+/**
+ * '
  * For ripping delicious albums off the interwebz.
  */
 public abstract class AlbumRipper extends AbstractRipper {
@@ -29,9 +30,13 @@ public abstract class AlbumRipper extends AbstractRipper {
     }
 
     public abstract boolean canRip(URL url);
+
     public abstract URL sanitizeURL(URL url) throws MalformedURLException;
+
     public abstract void rip() throws IOException;
+
     public abstract String getHost();
+
     public abstract String getGID(URL url) throws MalformedURLException;
 
     protected boolean allowDuplicates() {
@@ -50,17 +55,17 @@ public abstract class AlbumRipper extends AbstractRipper {
     /**
      * Queues multiple URLs of single images to download from a single Album URL
      */
-    public boolean addURLToDownload(URL url, File saveAs, String referrer, Map<String,String> cookies, Boolean getFileExtFromMIME) {
-            // Only download one file if this is a test.
+    public boolean addURLToDownload(URL url, File saveAs, String referrer, Map<String, String> cookies, Boolean getFileExtFromMIME) {
+        // Only download one file if this is a test.
         if (super.isThisATest() &&
                 (itemsPending.size() > 0 || itemsCompleted.size() > 0 || itemsErrored.size() > 0)) {
             stop();
             return false;
         }
         if (!allowDuplicates()
-                && ( itemsPending.containsKey(url)
-                  || itemsCompleted.containsKey(url)
-                  || itemsErrored.containsKey(url) )) {
+                && (itemsPending.containsKey(url)
+                || itemsCompleted.containsKey(url)
+                || itemsErrored.containsKey(url))) {
             // Item is already downloaded/downloading, skip it.
             LOGGER.info("[!] Skipping " + url + " -- already attempted: " + Utils.removeCWD(saveAs));
             return false;
@@ -75,10 +80,13 @@ public abstract class AlbumRipper extends AbstractRipper {
             } catch (IOException e) {
                 LOGGER.error("Error while writing to " + urlFile, e);
             }
-        }
-        else {
+        } else {
+            if ((saveAs.getName().toLowerCase().endsWith(".mp4") || saveAs.getName().toLowerCase().endsWith(".webm")) && Utils.getConfigBoolean("photos.only", false)) {
+                LOGGER.info("[!] Skipping " + url + " -- is video!");
+                return false;
+            }
             itemsPending.put(url, saveAs);
-            DownloadFileThread dft = new DownloadFileThread(url,  saveAs,  this, getFileExtFromMIME);
+            DownloadFileThread dft = new DownloadFileThread(url, saveAs, this, getFileExtFromMIME);
             if (referrer != null) {
                 dft.setReferrer(referrer);
             }
@@ -99,10 +107,9 @@ public abstract class AlbumRipper extends AbstractRipper {
     /**
      * Queues image to be downloaded and saved.
      * Uses filename from URL to decide filename.
-     * @param url
-     *      URL to download
-     * @return
-     *      True on success
+     *
+     * @param url URL to download
+     * @return True on success
      */
     protected boolean addURLToDownload(URL url) {
         // Use empty prefix and empty subdirectory
@@ -177,10 +184,9 @@ public abstract class AlbumRipper extends AbstractRipper {
 
     /**
      * Sets directory to save all ripped files to.
-     * @param url
-     *      URL to define how the working directory should be saved.
-     * @throws
-     *      IOException
+     *
+     * @param url URL to define how the working directory should be saved.
+     * @throws IOException
      */
     @Override
     public void setWorkingDir(URL url) throws IOException {
@@ -209,27 +215,25 @@ public abstract class AlbumRipper extends AbstractRipper {
     }
 
     /**
-     * @return
-     *      Integer between 0 and 100 defining the progress of the album rip.
+     * @return Integer between 0 and 100 defining the progress of the album rip.
      */
     @Override
     public int getCompletionPercentage() {
-        double total = itemsPending.size()  + itemsErrored.size() + itemsCompleted.size();
-        return (int) (100 * ( (total - itemsPending.size()) / total));
+        double total = itemsPending.size() + itemsErrored.size() + itemsCompleted.size();
+        return (int) (100 * ((total - itemsPending.size()) / total));
     }
 
     /**
-     * @return
-     *      Human-readable information on the status of the current rip.
+     * @return Human-readable information on the status of the current rip.
      */
     @Override
     public String getStatusText() {
         StringBuilder sb = new StringBuilder();
         sb.append(getCompletionPercentage())
-          .append("% ")
-          .append("- Pending: "  ).append(itemsPending.size())
-          .append(", Completed: ").append(itemsCompleted.size())
-          .append(", Errored: "  ).append(itemsErrored.size());
+                .append("% ")
+                .append("- Pending: ").append(itemsPending.size())
+                .append(", Completed: ").append(itemsCompleted.size())
+                .append(", Errored: ").append(itemsErrored.size());
         return sb.toString();
     }
 }
