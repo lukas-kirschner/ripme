@@ -109,7 +109,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
     private static JLabel configSaveDirLabel;
     private static JButton configSaveDirButton;
     private static JTextField configRetriesText;
-    private static JCheckBox configAutoupdateCheckbox;
     private static JComboBox<String> configLogLevelCombobox;
     private static JCheckBox configURLHistoryCheckbox;
     private static JCheckBox configPlaySound;
@@ -205,7 +204,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         Utils.setConfigInteger("download.retries", Integer.parseInt(configRetriesText.getText()));
         Utils.setConfigInteger("download.timeout", Integer.parseInt(configTimeoutText.getText()));
         Utils.setConfigBoolean("clipboard.autorip", ClipboardUtils.getClipboardAutoRip());
-        Utils.setConfigBoolean("auto.update", configAutoupdateCheckbox.isSelected());
         Utils.setConfigString("log.level", configLogLevelCombobox.getSelectedItem().toString());
         Utils.setConfigBoolean("play.sound", configPlaySound.isSelected());
         Utils.setConfigBoolean("download.save_order", configSaveOrderCheckbox.isSelected());
@@ -503,7 +501,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         configRetriesText = new JTextField(Integer.toString(Utils.getConfigInteger("download.retries", 3)));
         configOverwriteCheckbox = addNewCheckbox(Utils.getLocalizedString("overwrite.existing.files"), "file.overwrite",
                 false);
-        configAutoupdateCheckbox = addNewCheckbox(Utils.getLocalizedString("auto.update"), "auto.update", true);
         configPlaySound = addNewCheckbox(Utils.getLocalizedString("sound.when.rip.completes"), "play.sound", false);
         configShowPopup = addNewCheckbox(Utils.getLocalizedString("notification.when.rip.starts"),
                 "download.show_popup", false);
@@ -543,7 +540,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         configSaveDirLabel.setHorizontalAlignment(JLabel.RIGHT);
         configSaveDirButton = new JButton(Utils.getLocalizedString("select.save.dir") + "...");
 
-        addItemToConfigGridBagConstraints(gbc, 0, configAutoupdateCheckbox, configLogLevelCombobox);
+        addItemToConfigGridBagConstraints(gbc, 0, configDownloadPhotosOnly, configLogLevelCombobox);
         addItemToConfigGridBagConstraints(gbc, 1, configThreadsLabel, configThreadsText);
         addItemToConfigGridBagConstraints(gbc, 2, configTimeoutLabel, configTimeoutText);
         addItemToConfigGridBagConstraints(gbc, 3, configRetriesLabel, configRetriesText);
@@ -552,10 +549,9 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         addItemToConfigGridBagConstraints(gbc, 6, configShowPopup, configSaveURLsOnly);
         addItemToConfigGridBagConstraints(gbc, 7, configClipboardAutorip, configSaveAlbumTitles);
         addItemToConfigGridBagConstraints(gbc, 8, configSaveDescriptions, configPreferMp4);
-        addItemToConfigGridBagConstraints(gbc, 9, new JCheckBox("Dummy"), configDownloadPhotosOnly);
-        addItemToConfigGridBagConstraints(gbc, 10, configWindowPosition, configURLHistoryCheckbox);
-        addItemToConfigGridBagConstraints(gbc, 11, configSelectLangComboBox, configUrlFileChooserButton);
-        addItemToConfigGridBagConstraints(gbc, 12, configSaveDirLabel, configSaveDirButton);
+        addItemToConfigGridBagConstraints(gbc, 9, configWindowPosition, configURLHistoryCheckbox);
+        addItemToConfigGridBagConstraints(gbc, 10, configSelectLangComboBox, configUrlFileChooserButton);
+        addItemToConfigGridBagConstraints(gbc, 11, configSaveDirLabel, configSaveDirButton);
 
         emptyPanel = new JPanel();
         emptyPanel.setPreferredSize(new Dimension(0, 0));
@@ -643,7 +639,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         configTimeoutLabel.setText(Utils.getLocalizedString("timeout.mill"));
         configRetriesLabel.setText(Utils.getLocalizedString("retry.download.count"));
         configOverwriteCheckbox.setText(Utils.getLocalizedString("overwrite.existing.files"));
-        configAutoupdateCheckbox.setText(Utils.getLocalizedString("auto.update"));
         configPlaySound.setText(Utils.getLocalizedString("sound.when.rip.completes"));
         configShowPopup.setText(Utils.getLocalizedString("notification.when.rip.starts"));
         configSaveOrderCheckbox.setText(Utils.getLocalizedString("preserve.order"));
