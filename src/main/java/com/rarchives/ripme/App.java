@@ -16,8 +16,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
-import javax.swing.SwingUtilities;
-
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -41,7 +42,7 @@ import com.rarchives.ripme.utils.Utils;
  *
  * As the "controller" to all other classes, it parses command line parameters and loads the history.
  */
-public class App {
+public class App extends Application {
 
     public static final Logger logger = Logger.getLogger(App.class);
     public static String stringToAppendToFoldername = null;
@@ -84,9 +85,7 @@ public class App {
             Utils.configureLogger();
 
             logger.info("Initialized " + Utils.IMPLEMENTATION_TITLE + " v" + Utils.IMPLEMENTATION_VERSION);
-
-            MainWindow mw = new MainWindow();
-            SwingUtilities.invokeLater(mw);
+            launch(args);
         }
     }
 
@@ -396,5 +395,11 @@ public class App {
         } catch (IOException e) {
             logger.error("Failed to save history to file " + historyFile, e);
         }
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        MainWindow mw = new MainWindow(primaryStage);
+        Platform.runLater(mw);
     }
 }

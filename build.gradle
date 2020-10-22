@@ -1,10 +1,20 @@
-apply plugin: 'java'
+plugins {
+    id 'java'
+    id 'idea'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+}
 group 'com.rarchives.ripme'
 version '1.7.93'
 description 'ripme'
 sourceCompatibility = 1.8
 project.ext.deploydir = "$projectDir/bin"
-
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
 repositories {
     mavenLocal()
     mavenCentral()
@@ -12,7 +22,10 @@ repositories {
         url = uri('http://repo.maven.apache.org/maven2')
     }
 }
-
+javafx {
+    version = "11"
+    modules = ['javafx.controls', 'javafx.fxml']
+}
 dependencies {
     implementation 'org.jsoup:jsoup:1.8.1'
     implementation 'org.graalvm.js:js:20.1.0'

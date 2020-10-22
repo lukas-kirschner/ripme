@@ -181,12 +181,10 @@ public class Utils {
         config.addProperty(key, list);
     }
 
-    public static void setConfigList(String key, Enumeration<Object> enumeration) {
+    public static void setConfigList(String key, Stream<String> enumeration) {
         config.clearProperty(key);
         List<Object> list = new ArrayList<>();
-        while (enumeration.hasMoreElements()) {
-            list.add(enumeration.nextElement());
-        }
+        enumeration.forEach(list::add);
         config.addProperty(key, list);
     }
 

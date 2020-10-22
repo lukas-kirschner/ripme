@@ -1,13 +1,6 @@
 package com.rarchives.ripme.ui;
 
-import java.awt.*;
-import java.awt.TrayIcon.MessageType;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.TrayIcon;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -17,38 +10,24 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.TextAlignment;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
@@ -58,7 +37,11 @@ import com.rarchives.ripme.ripper.AbstractRipper;
 import com.rarchives.ripme.utils.RipUtils;
 import com.rarchives.ripme.utils.Utils;
 
-import javax.swing.UnsupportedLookAndFeelException;
+import javafx.application.*;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.*;
 
 /**
  * Everything UI-related starts and ends here.
@@ -69,80 +52,81 @@ public final class MainWindow implements Runnable, RipStatusHandler {
 
     private boolean isRipping = false; // Flag to indicate if we're ripping something
 
-    private static JFrame mainFrame;
-    private static JTextField ripTextfield;
-    private static JButton ripButton, stopButton;
+    private static Stage stage;
+    private static GridPane mainFrame;
+    private static TextField ripTextfield;
+    private static Button ripButton, stopButton;
 
-    private static JLabel statusLabel;
-    private static JButton openButton;
-    private static JProgressBar statusProgress;
+    private static Label statusLabel;
+    private static Button openButton;
+    private static ProgressBar statusProgress;
 
     // Put an empty JPanel on the bottom of the window to keep components
     // anchored to the top when there is no open lower panel
-    private static JPanel emptyPanel;
+    private static Pane emptyPanel;
 
     // Log
-    private static JButton optionLog;
-    private static JPanel logPanel;
-    private static JTextPane logText;
+    private static Button optionLog;
+    private static GridPane logPanel;
+    private static TextArea logText;
 
     // History
-    private static JButton optionHistory;
+    private static Button optionHistory;
     private static final History HISTORY = new History();
-    private static JPanel historyPanel;
-    private static JTable historyTable;
-    private static AbstractTableModel historyTableModel;
-    private static JButton historyButtonRemove, historyButtonClear, historyButtonRerip;
+    private static GridPane historyPanel;
+    private static TextArea historyTable;
+    private static ObservableList<String> historyTableModel;
+    private static Button historyButtonRemove, historyButtonClear, historyButtonRerip;
 
     // Queue
-    public static JButton optionQueue;
-    private static JPanel queuePanel;
-    private static DefaultListModel<Object> queueListModel;
+    public static Button optionQueue;
+    private static GridPane queuePanel;
+    private static ObservableList<String> queueListModel;
     private static QueueMenuMouseListener queueMenuMouseListener;
 
     // Configuration
-    private static JButton optionConfiguration;
-    private static JPanel configurationPanel;
-    private static JTextField configTimeoutText;
-    private static JTextField configThreadsText;
-    private static JCheckBox configOverwriteCheckbox;
-    private static JLabel configSaveDirLabel;
-    private static JButton configSaveDirButton;
-    private static JTextField configRetriesText;
-    private static JComboBox<String> configLogLevelCombobox;
-    private static JCheckBox configURLHistoryCheckbox;
-    private static JCheckBox configPlaySound;
-    private static JCheckBox configSaveOrderCheckbox;
-    private static JCheckBox configShowPopup;
-    private static JCheckBox configSaveLogs;
-    private static JCheckBox configSaveURLsOnly;
-    private static JCheckBox configSaveAlbumTitles;
-    private static JCheckBox configClipboardAutorip;
-    private static JCheckBox configSaveDescriptions;
-    private static JCheckBox configPreferMp4;
-    private static JCheckBox configDownloadPhotosOnly;
-    private static JCheckBox configWindowPosition;
-    private static JComboBox<String> configSelectLangComboBox;
-    private static JLabel configThreadsLabel;
-    private static JLabel configTimeoutLabel;
-    private static JLabel configRetriesLabel;
+    private static Button optionConfiguration;
+    private static GridPane configurationPanel;
+    private static TextField configTimeoutText;
+    private static TextField configThreadsText;
+    private static CheckBox configOverwriteCheckbox;
+    private static Label configSaveDirLabel;
+    private static Button configSaveDirButton;
+    private static TextField configRetriesText;
+    private static ComboBox<String> configLogLevelCombobox;
+    private static CheckBox configURLHistoryCheckbox;
+    private static CheckBox configPlaySound;
+    private static CheckBox configSaveOrderCheckbox;
+    private static CheckBox configShowPopup;
+    private static CheckBox configSaveLogs;
+    private static CheckBox configSaveURLsOnly;
+    private static CheckBox configSaveAlbumTitles;
+    private static CheckBox configClipboardAutorip;
+    private static CheckBox configSaveDescriptions;
+    private static CheckBox configPreferMp4;
+    private static CheckBox configDownloadPhotosOnly;
+    private static CheckBox configWindowPosition;
+    private static ComboBox<String> configSelectLangComboBox;
+    private static Label configThreadsLabel;
+    private static Label configTimeoutLabel;
+    private static Label configRetriesLabel;
     // This doesn't really belong here but I have no idea where else to put it
-    private static JButton configUrlFileChooserButton;
+    private static Button configUrlFileChooserButton;
 
     private static TrayIcon trayIcon;
     private static MenuItem trayMenuMain;
-    private static CheckboxMenuItem trayMenuAutorip;
+    private static CheckMenuItem trayMenuAutorip;
 
     private static Image mainIcon;
 
     private static AbstractRipper ripper;
 
-    private void updateQueue(DefaultListModel<Object> model) {
+    private void updateQueue(ObservableList<String> model) {
         if (model == null)
             model = queueListModel;
 
         if (model.size() > 0) {
-            Utils.setConfigList("queue", (Enumeration<Object>) model.elements());
+            Utils.setConfigList("queue", model.stream());
             Utils.saveConfig();
         }
 
@@ -154,31 +138,35 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         updateQueue(null);
     }
 
-    private static void addCheckboxListener(JCheckBox checkBox, String configString) {
-        checkBox.addActionListener(arg0 -> {
-            Utils.setConfigBoolean(configString, checkBox.isSelected());
-            Utils.configureLogger();
+    private static void addCheckboxListener(CheckBox checkBox, String configString) {
+        checkBox.selectedProperty().addListener((observable,oldValue,newValue) -> {
+            Utils.setConfigBoolean(configString, newValue);
+            Utils.configureLogger(); // TODO why?
         });
 
     }
 
-    private static JCheckBox addNewCheckbox(String text, String configString, Boolean configBool) {
-        JCheckBox checkbox = new JCheckBox(text, Utils.getConfigBoolean(configString, configBool));
-        checkbox.setHorizontalAlignment(JCheckBox.RIGHT);
-        checkbox.setHorizontalTextPosition(JCheckBox.LEFT);
+    private static CheckBox addNewCheckbox(String text, String configString, Boolean configBool) {
+        CheckBox checkbox = new CheckBox(text);
+        checkbox.setSelected(Utils.getConfigBoolean(configString, configBool));
+        checkbox.setAlignment(Pos.BASELINE_RIGHT);
+        checkbox.setTextAlignment(TextAlignment.LEFT);
         return checkbox;
     }
 
     public static void addUrlToQueue(String url) {
-        queueListModel.addElement(url);
+        queueListModel.add(url);
     }
 
-    public MainWindow() {
-        mainFrame = new JFrame(Utils.IMPLEMENTATION_TITLE + " v" + Utils.IMPLEMENTATION_VERSION);
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.setLayout(new GridBagLayout());
+    public MainWindow(Stage primaryStage) {
+        stage = primaryStage;
+        stage.setTitle(Utils.IMPLEMENTATION_TITLE + " v" + Utils.IMPLEMENTATION_VERSION);
+        stage.setOnCloseRequest(t -> {
+            Platform.exit();
+        });
+        mainFrame = new GridPane();
 
-        createUI(mainFrame.getContentPane());
+        createUI(mainFrame);
         pack();
 
         loadHistory();
@@ -189,13 +177,13 @@ public final class MainWindow implements Runnable, RipStatusHandler {
 
         boolean autoripEnabled = Utils.getConfigBoolean("clipboard.autorip", false);
         ClipboardUtils.setClipboardAutoRip(autoripEnabled);
-        trayMenuAutorip.setState(autoripEnabled);
+        trayMenuAutorip.setSelected(autoripEnabled);
     }
 
     public void run() {
         pack();
-        restoreWindowPosition(mainFrame);
-        mainFrame.setVisible(true);
+        restoreWindowPositionAndSetupScene();
+        stage.show();
     }
 
     private void shutdownCleanup() {
@@ -204,7 +192,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         Utils.setConfigInteger("download.retries", Integer.parseInt(configRetriesText.getText()));
         Utils.setConfigInteger("download.timeout", Integer.parseInt(configTimeoutText.getText()));
         Utils.setConfigBoolean("clipboard.autorip", ClipboardUtils.getClipboardAutoRip());
-        Utils.setConfigString("log.level", configLogLevelCombobox.getSelectedItem().toString());
+        Utils.setConfigString("log.level", configLogLevelCombobox.getValue());
         Utils.setConfigBoolean("play.sound", configPlaySound.isSelected());
         Utils.setConfigBoolean("download.save_order", configSaveOrderCheckbox.isSelected());
         Utils.setConfigBoolean("download.show_popup", configShowPopup.isSelected());
@@ -216,8 +204,8 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         Utils.setConfigBoolean("prefer.mp4", configPreferMp4.isSelected());
         Utils.setConfigBoolean("photos.only", configDownloadPhotosOnly.isSelected());
         Utils.setConfigBoolean("remember.url_history", configURLHistoryCheckbox.isSelected());
-        Utils.setConfigString("lang", configSelectLangComboBox.getSelectedItem().toString());
-        saveWindowPosition(mainFrame);
+        Utils.setConfigString("lang", configSelectLangComboBox.getValue());
+        saveWindowPosition();
         saveHistory();
         Utils.saveConfig();
     }
@@ -230,19 +218,19 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         statusWithColor(text, Color.RED);
     }
 
-    private void statusWithColor(String text, Color color) {
-        statusLabel.setForeground(color);
+    private void statusWithColor(String text, Paint color) {
+        statusLabel.setTextFill(color);
         statusLabel.setText(text);
         pack();
     }
 
     private void pack() {
-        SwingUtilities.invokeLater(() -> {
-            Dimension preferredSize = mainFrame.getPreferredSize();
-            mainFrame.setMinimumSize(preferredSize);
-            if (isCollapsed()) {
-                mainFrame.setSize(preferredSize);
-            }
+        Platform.runLater(() -> {
+//            Dimension preferredSize = mainFrame.getPreferredSize();
+//            mainFrame.setMinimumSize(preferredSize);
+//            if (isCollapsed()) {
+//                mainFrame.setSize(preferredSize);
+//            }//TODO
         });
     }
 
@@ -252,15 +240,15 @@ public final class MainWindow implements Runnable, RipStatusHandler {
                 && !configurationPanel.isVisible());
     }
 
-    private void createUI(Container pane) {
+    private void createUI(GridPane pane) {
         // If creating the tray icon fails, ignore it.
         try {
             setupTrayIcon();
         } catch (Exception e) {
+            e.printStackTrace();
         }
 
         EmptyBorder emptyBorder = new EmptyBorder(5, 5, 5, 5);
-        GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
         gbc.ipadx = 2;
@@ -269,27 +257,28 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         gbc.ipady = 2;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.PAGE_START;
+//TODO set custom CSS here...? or native look and feel if possible
 
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException
-                | IllegalAccessException e) {
-            LOGGER.error("[!] Exception setting system theme:", e);
-        }
+//        try {
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//        } catch (ClassNotFoundException | InstantiationException
+//                | IllegalAccessException e) {
+//            LOGGER.error("[!] Exception setting system theme:", e);
+//        }
 
-        ripTextfield = new JTextField("", 20);
-        ripTextfield.addMouseListener(new ContextMenuMouseListener());
-        ImageIcon ripIcon = new ImageIcon(mainIcon);
-        ripButton = new JButton("<html><font size=\"5\"><b>Rip</b></font></html>", ripIcon);
-        stopButton = new JButton("<html><font size=\"5\"><b>Stop</b></font></html>");
-        stopButton.setEnabled(false);
-        try {
-            Image stopIcon = ImageIO.read(getClass().getClassLoader().getResource("stop.png"));
-            stopButton.setIcon(new ImageIcon(stopIcon));
-        } catch (Exception ignored) {
-        }
-        JPanel ripPanel = new JPanel(new GridBagLayout());
-        ripPanel.setBorder(emptyBorder);
+        ripTextfield = new TextField("");
+//        ripTextfield.addMouseListener(new ContextMenuMouseListener());//TODO
+//        ImageIcon ripIcon = new ImageIcon(mainIcon);
+        ripButton = new Button("Rip");
+        stopButton = new Button("Stop");
+        stopButton.setDisable(true);
+//        try {
+//            Image stopIcon = new Image(getClass().getClassLoader().getResource("stop.png").toString());
+//            stopButton.setIcon(new ImageIcon(stopIcon));
+//        } catch (Exception ignored) {
+//        }
+        GridPane ripPanel = new GridPane();
+//        ripPanel.setBorder(emptyBorder);
 
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 0;
@@ -1497,12 +1486,12 @@ public final class MainWindow implements Runnable, RipStatusHandler {
 
     public void update(AbstractRipper ripper, RipStatusMessage message) {
         StatusEvent event = new StatusEvent(ripper, message);
-        SwingUtilities.invokeLater(event);
+        Platform.runLater(event);
     }
 
     public static void ripAlbumStatic(String url) {
         ripTextfield.setText(url.trim());
-        ripButton.doClick();
+        ripButton.fire();
     }
 
     public static void enableWindowPositioning() {
@@ -1528,27 +1517,15 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         return isEnabled && !hasWindowPositionBug();
     }
 
-    private static void saveWindowPosition(Frame frame) {
+    private static void saveWindowPosition() {
         if (!isWindowPositioningEnabled()) {
             return;
         }
 
-        Point point;
-        try {
-            point = frame.getLocationOnScreen();
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                point = frame.getLocation();
-            } catch (Exception e2) {
-                e2.printStackTrace();
-                return;
-            }
-        }
-        int x = (int) point.getX();
-        int y = (int) point.getY();
-        int w = frame.getWidth();
-        int h = frame.getHeight();
+        int x = (int) stage.getX();
+        int y = (int) stage.getY();
+        int w = (int) stage.getWidth();
+        int h = (int) stage.getHeight();
         Utils.setConfigInteger("window.x", x);
         Utils.setConfigInteger("window.y", y);
         Utils.setConfigInteger("window.w", w);
@@ -1556,9 +1533,9 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         LOGGER.debug("Saved window position (x=" + x + ", y=" + y + ", w=" + w + ", h=" + h + ")");
     }
 
-    private static void restoreWindowPosition(Frame frame) {
+    private static void restoreWindowPositionAndSetupScene() {
         if (!isWindowPositioningEnabled()) {
-            mainFrame.setLocationRelativeTo(null); // default to middle of screen
+            stage.setScene(new Scene(mainFrame));
             return;
         }
 
@@ -1569,10 +1546,12 @@ public final class MainWindow implements Runnable, RipStatusHandler {
             int h = Utils.getConfigInteger("window.h", -1);
             if (x < 0 || y < 0 || w <= 0 || h <= 0) {
                 LOGGER.debug("UNUSUAL: One or more of: x, y, w, or h was still less than 0 after reading config");
-                mainFrame.setLocationRelativeTo(null); // default to middle of screen
+                stage.setScene(new Scene(mainFrame));
                 return;
             }
-            frame.setBounds(x, y, w, h);
+            stage.setScene(new Scene(mainFrame,w,h));
+            stage.setX(x);
+            stage.setY(y);
         } catch (Exception e) {
             e.printStackTrace();
         }
