@@ -66,6 +66,10 @@ public class RipUtils {
 
         }
         else if (url.getHost().endsWith("gfycat.com")) {
+            if (Utils.getConfigBoolean("photos.only",false)){
+                logger.info("Skipped gfycat.com URL: " + url);
+                return result; // Do not download from gfycat if we do not want any gifs or videos
+            }
             try {
                 logger.debug("Fetching gfycat page " + url);
                 String videoURL = GfycatRipper.getVideoURL(url);
@@ -78,6 +82,10 @@ public class RipUtils {
             return result;
         }
         else if (url.getHost().endsWith("redgifs.com") || url.getHost().endsWith("gifdeliverynetwork.com")) {
+            if (Utils.getConfigBoolean("photos.only",false)){
+                logger.info("Skipped redgifs.com URL: " + url);
+                return result; // Do not download from redgifs if we do not want any gifs or videos
+            }
             try {
                 logger.debug("Fetching redgifs page " + url);
                 String videoURL = RedgifsRipper.getVideoURL(url);
@@ -109,6 +117,10 @@ public class RipUtils {
             }
             return result;
         } else if (url.toExternalForm().contains("v.redd.it")) {
+            if (Utils.getConfigBoolean("photos.only",false)){
+                logger.info("Skipped v.redd.it URL: " + url);
+                return result; // Do not download from v.redd.it if we do not want any gifs or videos
+            }
             result.add(url);
             return result;
         }

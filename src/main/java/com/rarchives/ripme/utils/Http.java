@@ -81,10 +81,10 @@ public class Http {
             while (parts.length > 1) {
                 String domain = String.join(".", parts);
                 // Try to get cookies for this host from config
-                logger.info("Trying to load cookies from config for " + domain);
                 cookieStr = Utils.getConfigString("cookies." + domain, "");
                 if (!cookieStr.equals("")) {
-                    cookieDomain = domain; 
+                    logger.info("Trying to load cookies from config for " + domain);
+                    cookieDomain = domain;
                     // we found something, start parsing
                     break;
                 }
@@ -179,21 +179,17 @@ public class Http {
             try {
                 response = connection.execute();
                 return response;
-            } catch (IOException e) {
-                // Warn users about possibly fixable permission error
-                if (e instanceof org.jsoup.HttpStatusException) {
-                    HttpStatusException ex = (HttpStatusException)e;
-                    
-                    // These status codes might indicate missing cookies
-                    //     401 Unauthorized
-                    //     403 Forbidden
-
-                    int status =  ex.getStatusCode();
-                    if (status == 401 || status == 403) {
-                        throw new IOException("Failed to load " + url + ": Status Code " +  Integer.toString(status) + ". You might be able to circumvent this error by setting cookies for this domain" , e);
-                    }
+            } catch (HttpStatusException e) {
+                int status =  e.getStatusCode();
+                if (status == 401 || status == 403) {
+                    throw new IOException("Failed to load " + url + ": Status Code " +  Integer.toString(status) + ". You might be able to circumvent this error by setting cookies for this domain" , e);
+                } else if (status == 404) {
+                    logger.warn("The URL " + url + " returned code " + status);
+                } else {
+                    logger.warn("The URL " + url + " returned code " + status,e);
                 }
-
+                lastException = e;
+            } catch (IOException e) {
                 logger.warn("Error while loading " + url, e);
                 lastException = e;
             }

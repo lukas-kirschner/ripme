@@ -258,6 +258,8 @@ public class App extends Application {
                 while ((url = br.readLine()) != null) {
                     if (url.startsWith("//") || url.startsWith("#")) {
                         logger.debug("Skipping over line \"" + url + "\"because it is a comment");
+                    } else if (url.trim().isEmpty()){
+                        //Skip empty lines
                     } else {
                         // loop through each url in the file and process each url individually.
                         ripURL(url.trim(), !cl.hasOption("n"));
@@ -290,7 +292,7 @@ public class App extends Application {
             rip(url);
             saveHistory();
         } catch (MalformedURLException e) {
-            logger.error("[!] Given URL is not valid. Expected URL format is http://domain.com/...");
+            logger.error("[!] Given URL " + targetURL + " is not valid. Expected URL format is http://domain.com/...");
             // System.exit(-1);
         } catch (Exception e) {
             logger.error("[!] Error while ripping URL " + targetURL, e);
@@ -342,7 +344,6 @@ public class App extends Application {
 
     /**
      * Loads history from history file into memory.
-     * @see MainWindow.loadHistory
      */
     private static void loadHistory() {
         File historyFile = new File(Utils.getConfigDir() + File.separator + "history.json");

@@ -275,7 +275,7 @@ public class ImgurRipper extends AlbumRipper {
         LOGGER.info("    Retrieving " + strUrl);
         Document doc = getAlbumData("https://api.imgur.com/3/album/" + strUrl.split("/a/")[1]);
         // Try to use embedded JSON to retrieve images
-        LOGGER.info(Jsoup.clean(doc.body().toString(), Whitelist.none()));
+//        LOGGER.info(Jsoup.clean(doc.body().toString(), Whitelist.none()));
 
             try {
                 JSONObject json = new JSONObject(Jsoup.clean(doc.body().toString(), Whitelist.none()));

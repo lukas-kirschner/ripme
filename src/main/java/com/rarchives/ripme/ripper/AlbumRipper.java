@@ -81,7 +81,7 @@ public abstract class AlbumRipper extends AbstractRipper {
                 LOGGER.error("Error while writing to " + urlFile, e);
             }
         } else {
-            if ((saveAs.getName().toLowerCase().endsWith(".mp4") || saveAs.getName().toLowerCase().endsWith(".webm")) && Utils.getConfigBoolean("photos.only", false)) {
+            if ((saveAs.getName().toLowerCase().endsWith(".mp4") || saveAs.getName().toLowerCase().endsWith(".webm") || saveAs.getName().toLowerCase().endsWith(".gif")) && Utils.getConfigBoolean("photos.only", false)) {
                 LOGGER.info("[!] Skipping " + url + " -- is video!");
                 return false;
             }
