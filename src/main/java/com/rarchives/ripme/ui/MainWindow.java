@@ -22,6 +22,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -250,14 +253,28 @@ public final class MainWindow implements Runnable, RipStatusHandler {
     private void createConfigurationPanel(){
         GridPane mainConfigurationPane = new GridPane();
         configurationPanel = new ScrollPane(mainConfigurationPane);
+        configurationPanel.setFitToHeight(true);
+        configurationPanel.setFitToWidth(true);
+        mainConfigurationPane.setHgap(5);
+        mainConfigurationPane.setVgap(2);
+        ColumnConstraints c1 = new ColumnConstraints();
+        c1.setHgrow(Priority.ALWAYS);
+        c1.setPercentWidth(25);
+        ColumnConstraints c2 = new ColumnConstraints();
+        c2.setHgrow(Priority.ALWAYS);
+        c2.setPercentWidth(75);
+        mainConfigurationPane.getColumnConstraints().addAll(c1,c2);
         AtomicInteger currentRow = new AtomicInteger(0);
 
         for (final ConfigUIItem<?,? extends Node> item : configUIItems){
             final int rowIndex = currentRow.getAndIncrement();
-            mainConfigurationPane.add(item.instantiateDescriptionLabel(),0,rowIndex);
-            mainConfigurationPane.add(item.instantiateConfigNode(),1,rowIndex);
+            final Label lbl = item.instantiateDescriptionLabel();
+            GridPane.setHalignment(lbl, HPos.RIGHT);
+            GridPane.setValignment(lbl, VPos.CENTER);
+            mainConfigurationPane.add(lbl,0,rowIndex,1,1);
+            mainConfigurationPane.add(item.instantiateConfigNode(),1,rowIndex,1,1);
             item.loadConfiguration();
-            //TODO style, listeners...?
+            //TODO style, listeners...? Change from GridPane to ListView?
         }
 
 //        configUrlFileChooserButton = new JButton(Utils.getLocalizedString("download.url.list"));//TODO add this button somewhere else!
@@ -319,20 +336,24 @@ public final class MainWindow implements Runnable, RipStatusHandler {
 //        }
         //todo
         HBox ripPanel = new HBox(new Label("URL:"),ripTextfield,ripButton,stopButton);
+        ripPanel.setAlignment(Pos.BASELINE_CENTER);
         HBox.setHgrow(ripTextfield,Priority.ALWAYS);
 
         statusLabel = new Label(Utils.getLocalizedString("inactive"));
 //        statusLabel.setHorizontalAlignment(JLabel.CENTER);
         openButton = new Button();
         openButton.setVisible(false);
-        HBox statusPanel = new HBox(statusLabel,openButton);
         HBox.setHgrow(statusLabel,Priority.ALWAYS);
+        HBox statusPanel = new HBox(statusLabel,openButton);
+        statusPanel.setAlignment(Pos.BASELINE_CENTER);
 
         statusProgress = new ProgressBar();
-        HBox progressPanel = new HBox(statusProgress);
+        statusProgress.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(statusProgress,Priority.ALWAYS);
+        HBox progressPanel = new HBox(statusProgress);
 
         optionsPanel = new TabPane();
+        optionsPanel.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         VBox.setVgrow(optionsPanel,Priority.ALWAYS);
 
         createLogPanel();
@@ -345,42 +366,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         optionQueue = new Tab(Utils.getLocalizedString("queue"),queuePanel);
         optionConfiguration = new Tab(Utils.getLocalizedString("Configuration"),configurationPanel);
         optionsPanel.getTabs().addAll(optionLog,optionHistory,optionQueue,optionConfiguration);
-//        try {
-//            Image icon;
-//            icon = ImageIO.read(getClass().getClassLoader().getResource("comment.png"));
-//            optionLog.setIcon(new ImageIcon(icon));
-//            icon = ImageIO.read(getClass().getClassLoader().getResource("time.png"));
-//            optionHistory.setIcon(new ImageIcon(icon));
-//            icon = ImageIO.read(getClass().getClassLoader().getResource("list.png"));
-//            optionQueue.setIcon(new ImageIcon(icon));
-//            icon = ImageIO.read(getClass().getClassLoader().getResource("gear.png"));
-//            optionConfiguration.setIcon(new ImageIcon(icon));
-//        } catch (Exception e) {
-//        }
-
-//        gbc.anchor = GridBagConstraints.PAGE_START;
-//        gbc.gridy = 0;
-//        pane.add(ripPanel, gbc);
-//        gbc.gridy = 1;
-//        pane.add(statusPanel, gbc);
-//        gbc.gridy = 2;
-//        pane.add(progressPanel, gbc);
-//        gbc.gridy = 3;
-//        pane.add(optionsPanel, gbc);
-//        gbc.weighty = 1;
-//        gbc.fill = GridBagConstraints.BOTH;
-//        gbc.gridy = 4;
-//        pane.add(logPanel, gbc);
-//        gbc.gridy = 5;
-//        pane.add(historyPanel, gbc);
-//        gbc.gridy = 5;
-//        pane.add(queuePanel, gbc);
-//        gbc.gridy = 5;
-//        pane.add(configurationPanel, gbc);
-//        gbc.gridy = 5;
-//        pane.add(emptyPanel, gbc);
-//        gbc.weighty = 0;
-//        gbc.fill = GridBagConstraints.HORIZONTAL;
         pane.getChildren().addAll(ripPanel,statusPanel,progressPanel,optionsPanel);
     }
 

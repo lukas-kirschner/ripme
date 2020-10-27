@@ -30,6 +30,7 @@ public abstract class ConfigUIItem<T, U> {
     public final Label instantiateDescriptionLabel() {
         if (descriptionLabel == null) {
             descriptionLabel = new Label();
+            updateLocale();
         }
         return descriptionLabel;
     }
