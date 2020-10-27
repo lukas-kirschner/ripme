@@ -7,7 +7,7 @@ plugins {
 group 'com.rarchives.ripme'
 version '1.7.93'
 description 'ripme'
-sourceCompatibility = 1.8
+sourceCompatibility = 1.11
 project.ext.deploydir = "$projectDir/bin"
 idea {
     module {
@@ -24,7 +24,7 @@ repositories {
 }
 javafx {
     version = "11"
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.base']
 }
 dependencies {
     implementation 'org.jsoup:jsoup:1.8.1'
@@ -53,7 +53,7 @@ task buildJar(type: Jar) {
     manifest {
         attributes('Implementation-Title': project.name,
                 'Implementation-Version': project.version,
-                'Main-Class': 'com.rarchives.ripme.App',
+                'Main-Class': 'com.rarchives.ripme.Main',
                 'Class-Path': configurations.runtimeClasspath.collect { 'lib/' + file(it).name }.join(' ')
         )
     }

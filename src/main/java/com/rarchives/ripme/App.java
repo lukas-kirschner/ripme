@@ -54,7 +54,7 @@ public class App extends Application {
      *
      * @param args Array of command line arguments.
      */
-    public static void main(String[] args) throws MalformedURLException {
+    public static void main(String[] args) {
         CommandLine cl = getArgs(args);
 
         if (args.length > 0 && cl.hasOption('v')){

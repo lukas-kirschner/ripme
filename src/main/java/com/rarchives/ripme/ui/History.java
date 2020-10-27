@@ -35,6 +35,14 @@ public class History {
     public void remove(HistoryEntry entry) {
         list.remove(entry);
     }
+    public void remove(String url){ // TODO performance
+        for (int i = 0; i < list.size(); i++){
+            if (list.get(i).url.equals(url)){
+                list.remove(i);
+                break;
+            }
+        }
+    }
     public void remove(int index) {
         list.remove(index);
     }

@@ -42,6 +42,7 @@ import javax.sound.sampled.LineEvent;
 import com.rarchives.ripme.App;
 import com.rarchives.ripme.ripper.AbstractRipper;
 
+import javafx.collections.ObservableList;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.LogManager;
@@ -55,7 +56,7 @@ public class Utils {
 
     private static final Pattern pattern = Pattern.compile("LabelsBundle_(?<lang>[A-Za-z_]+).properties");
     private static final String DEFAULT_LANG = "en_US";
-    private static final String RIP_DIRECTORY = "rips";
+    public static final String RIP_DIRECTORY = "rips";
     private static final String CONFIG_FILE = "rip.properties";
     private static final String OS = System.getProperty("os.name").toLowerCase();
     private static final Logger LOGGER = Logger.getLogger(Utils.class);
@@ -180,6 +181,10 @@ public class Utils {
         config.clearProperty(key);
         config.addProperty(key, list);
     }
+    public static <T> void setConfigList(String key, ObservableList<T> list) {
+        config.clearProperty(key);
+        config.addProperty(key, list);
+    }
 
     public static void setConfigList(String key, Stream<String> enumeration) {
         config.clearProperty(key);
@@ -240,7 +245,7 @@ public class Utils {
                 + File.separator + IMPLEMENTATION_TITLE;
     }
 
-    private static File getJarDirectory() {
+    public static File getJarDirectory() {
         File jarDirectory = Utils.class.getResource("/rip.properties").toString().contains("jar:")
                 ? new File(System.getProperty("java.class.path")).getParentFile()
                 : new File(System.getProperty("user.dir"));
