@@ -25,10 +25,10 @@ jobs:
     - name: Deploy Artifact Libs
       uses: actions/upload-artifact@v2
       with:
-        name: runtime-libs
+        name: runtime-libs-${{ matrix.os }}
         path: bin/lib
     - name: Deploy Artifact jarfile
       uses: actions/upload-artifact@v2
       with:
-        name: nightly-${{ steps.vars.outputs.sha_short }}
+        name: nightly-${{ steps.vars.outputs.sha_short }}-${{ matrix.os }}
         path: bin/*.jar
