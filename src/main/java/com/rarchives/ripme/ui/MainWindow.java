@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
@@ -19,6 +20,7 @@ import com.rarchives.ripme.ui.config.ConfigUIItem;
 import com.rarchives.ripme.ui.config.DirectoryConfigUIItem;
 import com.rarchives.ripme.ui.config.IntegerConfigUIItem;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -81,8 +83,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
     private static Tab optionHistory;
     private static final History HISTORY = new History();
     private static VBox historyPanel;
-    private static ListView<String> historyTable;
-    private static ObservableList<String> historyTableModel = FXCollections.observableArrayList();
+    private static ListView<HistoryEntry> historyTable;
     private static Button historyButtonRemove, historyButtonClear, historyButtonRerip;
 
     // Queue
@@ -152,24 +153,6 @@ public final class MainWindow implements Runnable, RipStatusHandler {
     }
 
     private void shutdownCleanup() {
-//        Utils.setConfigBoolean("file.overwrite", configOverwriteCheckbox.isSelected());
-//        Utils.setConfigInteger("threads.size", Integer.parseInt(configThreadsText.getText()));
-//        Utils.setConfigInteger("download.retries", Integer.parseInt(configRetriesText.getText()));
-//        Utils.setConfigInteger("download.timeout", Integer.parseInt(configTimeoutText.getText()));
-//        Utils.setConfigBoolean("clipboard.autorip", ClipboardUtils.getClipboardAutoRip());
-//        Utils.setConfigString("log.level", configLogLevelCombobox.getValue());
-//        Utils.setConfigBoolean("play.sound", configPlaySound.isSelected());
-//        Utils.setConfigBoolean("download.save_order", configSaveOrderCheckbox.isSelected());
-//        Utils.setConfigBoolean("download.show_popup", configShowPopup.isSelected());
-//        Utils.setConfigBoolean("log.save", configSaveLogs.isSelected());
-//        Utils.setConfigBoolean("urls_only.save", configSaveURLsOnly.isSelected());
-//        Utils.setConfigBoolean("album_titles.save", configSaveAlbumTitles.isSelected());
-//        Utils.setConfigBoolean("clipboard.autorip", configClipboardAutorip.isSelected());
-//        Utils.setConfigBoolean("descriptions.save", configSaveDescriptions.isSelected());
-//        Utils.setConfigBoolean("prefer.mp4", configPreferMp4.isSelected());
-//        Utils.setConfigBoolean("photos.only", configDownloadPhotosOnly.isSelected());
-//        Utils.setConfigBoolean("remember.url_history", configURLHistoryCheckbox.isSelected());
-//        Utils.setConfigString("lang", configSelectLangComboBox.getValue());
         saveWindowPosition();
         saveHistory();
         Utils.saveConfig();
@@ -212,10 +195,62 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         Pane dummyPane = new Pane();
         HBox.setHgrow(dummyPane,Priority.ALWAYS);
         HBox historyMenuPane = new HBox(historyButtonRemove,historyButtonRerip,dummyPane,historyButtonClear);
-        historyTable = new ListView<>(historyTableModel);
+        historyTable = new ListView<>();
+        historyTable.setItems(HISTORY);
+        historyTable.setCellFactory(listView -> new HistoryEntryListViewCell());
+        historyTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         VBox.setVgrow(historyTable,Priority.ALWAYS);
         historyPanel = new VBox(historyMenuPane,historyTable);
-        //TODO Button functionality
+
+        // Handlers
+        historyButtonRemove.setOnAction(event -> {
+            for (HistoryEntry item : historyTable.getSelectionModel().getSelectedItems()){
+                HISTORY.remove(item);
+            }
+            saveHistory();
+        });
+        historyButtonClear.setOnAction(event -> { // TODO Put dialog box code in one separate class
+            if (Utils.getConfigBoolean("history.warn_before_delete", true)) {
+                final String OK = Utils.getLocalizedString("dialog.ok");
+                final String CANCEL = Utils.getLocalizedString("dialog.cancel");
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.initStyle(StageStyle.UTILITY);
+                alert.setTitle(Utils.getLocalizedString("history.delete.confirm.title"));
+                alert.setHeaderText(Utils.getLocalizedString("history.delete.confirm.title"));
+                alert.setContentText(Utils.getLocalizedString("history.delete.confirm.body"));
+                String[] options = new String[]{OK, CANCEL};
+                List<ButtonType> buttons = new ArrayList<>();
+                for (String option : options) {
+                    buttons.add(new ButtonType(option));
+                }
+                alert.getButtonTypes().setAll(buttons);
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get().getText().equals(OK)) {
+                    //Fall through
+                } else {
+                    return;
+                }
+            }
+            HISTORY.clear();
+            saveHistory();
+        });
+        historyButtonRerip.setOnAction(event -> {
+            queueListModel.addAll(historyTable.getSelectionModel().getSelectedItems().stream().map(e -> e.url).collect(Collectors.toList()));
+        });
+        HISTORY.addListener(new ListChangeListener<HistoryEntry>() {
+            @Override
+            public void onChanged(Change<? extends HistoryEntry> c) {
+                if (c.getList().isEmpty()){
+                    historyButtonClear.setDisable(true);
+                    historyButtonRemove.setDisable(true);
+                    historyButtonRerip.setDisable(true);
+                } else {
+                    historyButtonClear.setDisable(false);
+                    historyButtonRemove.setDisable(false);
+                    historyButtonRerip.setDisable(false);
+                }
+            }
+        });
     }
     private void createQueuePanel(){
         queueView = new ListView<>();
@@ -489,70 +524,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
 //            }
 //            pack();
 //        });
-        historyButtonRemove.setOnAction(event -> {
-            for (String item : historyTable.getSelectionModel().getSelectedItems()){
-                HISTORY.remove(item);
-                historyTableModel.remove(item);
-            }
-            saveHistory();
-        });
-        historyButtonClear.setOnAction(event -> {//TODO grey out if history is empty
-            if (Utils.getConfigBoolean("history.warn_before_delete", true)) {
-                final String OK = Utils.getLocalizedString("dialog.ok");
-                final String CANCEL = Utils.getLocalizedString("dialog.cancel");
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.initStyle(StageStyle.UTILITY);
-                alert.setTitle(Utils.getLocalizedString("history.delete.confirm.title"));
-                alert.setHeaderText(Utils.getLocalizedString("history.delete.confirm.title"));
-                alert.setContentText(Utils.getLocalizedString("history.delete.confirm.body"));
-                String[] options = new String[]{OK, CANCEL};
-                List<ButtonType> buttons = new ArrayList<>();
-                for (String option : options) {
-                    buttons.add(new ButtonType(option));
-                }
-                alert.getButtonTypes().setAll(buttons);
-                Optional<ButtonType> result = alert.showAndWait();
-                if (result.isPresent() && result.get().getText().equals(OK)) {
-                    //Fall through
-                } else {
-                    return;
-                }
-//                //To make enter key press the actual focused button, not the first one. Just like pressing "space". // TODO Stackoverflow suggests this
-//                alert.getDialogPane().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-//                    if (event.getCode().equals(KeyCode.ENTER)) {
-//                        event.consume();
-//                        try {
-//                            Robot r = new Robot();
-//                            r.keyPress(java.awt.event.KeyEvent.VK_SPACE);
-//                            r.keyRelease(java.awt.event.KeyEvent.VK_SPACE);
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                });
-            } else {
-                Utils.clearURLHistory();
-                HISTORY.clear();
-                historyTableModel.clear();
-                saveHistory();
-            }
-        });
 
-        // Re-rip all selected history elements
-        historyButtonRerip.setOnAction(event -> {
-            if (HISTORY.isEmpty()) {//TODO Rewrite such that button greys out instead
-//                JOptionPane.showMessageDialog(null, Utils.getLocalizedString("history.load.none"), "RipMe Error",
-//                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            int added = 0;
-            queueListModel.addAll(historyTable.getSelectionModel().getSelectedItems());
-//            if (added == 0) {
-//                JOptionPane.showMessageDialog(null, Utils.getLocalizedString("history.load.none.checked"),
-//
-//                        "RipMe Error", JOptionPane.ERROR_MESSAGE);
-//            }
-        });
 //        configLogLevelCombobox.addActionListener(arg0 -> {
 //            String level = ((JComboBox) arg0.getSource()).getSelectedItem().toString();
 //            setLogLevel(level);
@@ -817,7 +789,7 @@ public final class MainWindow implements Runnable, RipStatusHandler {
         } else {
             LOGGER.info(Utils.getLocalizedString("loading.history.from.configuration"));
             HISTORY.fromList(Utils.getConfigList("download.history"));
-            if (HISTORY.toList().isEmpty()) {
+            if (HISTORY.isEmpty()) {
                 // Loaded from config, still no entries.
                 // Guess rip history based on rip folder
                 String[] dirs = Utils.getWorkingDirectory()

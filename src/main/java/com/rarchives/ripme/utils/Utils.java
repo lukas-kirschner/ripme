@@ -300,14 +300,6 @@ public class Utils {
     }
 
     /**
-     * Delete the url history file
-     */
-    public static void clearURLHistory() {
-        File file = new File(getURLHistoryFile());
-        file.delete();
-    }
-
-    /**
      * Return the path of the url history file
      */
     public static String getURLHistoryFile() {

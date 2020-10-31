@@ -1,10 +1,49 @@
 package com.rarchives.ripme.ui;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.json.JSONObject;
 
 public class HistoryEntry {
+
+    public static String prettyDate(Date date){
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return df.format(date);
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDir() {
+        return dir;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public String getStartDatePretty() {
+        return prettyDate(startDate);
+    }
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public String getModifiedDatePretty() {
+        return prettyDate(modifiedDate);
+    }
 
     public String  url          = "",
                    title        = "",
@@ -12,7 +51,6 @@ public class HistoryEntry {
     public int     count        = 0;
     public Date    startDate    = new Date(),
                    modifiedDate = new Date();
-    public boolean selected     = false;
 
     public HistoryEntry() {
     }
@@ -30,9 +68,6 @@ public class HistoryEntry {
         if (json.has("dir")) {
             this.dir      = json.getString("dir");
         }
-        if (json.has("selected")) {
-            this.selected = json.getBoolean("selected");
-        }
         return this;
     }
 
@@ -43,7 +78,6 @@ public class HistoryEntry {
         json.put("modifiedDate", this.modifiedDate.getTime());
         json.put("title",        this.title);
         json.put("count",        this.count);
-        json.put("selected",     this.selected);
         return json;
     }
 

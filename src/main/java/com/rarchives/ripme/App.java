@@ -171,11 +171,11 @@ public class App extends Application {
         if (cl.hasOption('r')) {
             // Re-rip all via command-line
             loadHistory();
-            if (HISTORY.toList().isEmpty()) {
+            if (HISTORY.isEmpty()) {
                 logger.error("There are no history entries to re-rip. Rip some albums first");
                 System.exit(-1);
             }
-            for (HistoryEntry entry : HISTORY.toList()) {
+            for (HistoryEntry entry : HISTORY) {
                 try {
                     URL url = new URL(entry.url);
                      rip(url);
@@ -194,31 +194,31 @@ public class App extends Application {
             System.exit(0);
         }
 
-        //Re-rip all <i>selected</i> albums
+        //Re-rip all <i>selected</i> albums //TODO javaFX-refactor
         if (cl.hasOption('R')) {
             loadHistory();
-            if (HISTORY.toList().isEmpty()) {
+            if (HISTORY.isEmpty()) {
                 logger.error("There are no history entries to re-rip. Rip some albums first");
                 System.exit(-1);
             }
             int added = 0;
-            for (HistoryEntry entry : HISTORY.toList()) {
-                if (entry.selected) {
-                    added++;
-                    try {
-                        URL url = new URL(entry.url);
-                        rip(url);
-                    } catch (Exception e) {
-                        logger.error("[!] Failed to rip URL " + entry.url, e);
-                        continue;
-                    }
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        logger.warn("[!] Interrupted while re-ripping history");
-                        System.exit(-1);
-                    }
-                }
+            for (HistoryEntry entry : HISTORY) {
+//                if (entry.selected) {
+//                    added++;
+//                    try {
+//                        URL url = new URL(entry.url);
+//                        rip(url);
+//                    } catch (Exception e) {
+//                        logger.error("[!] Failed to rip URL " + entry.url, e);
+//                        continue;
+//                    }
+//                    try {
+//                        Thread.sleep(500);
+//                    } catch (InterruptedException e) {
+//                        logger.warn("[!] Interrupted while re-ripping history");
+//                        System.exit(-1);
+//                    }
+//                }
             }
             if (added == 0) {
                 logger.error("No history entries have been 'Checked'\n" +
@@ -363,7 +363,7 @@ public class App extends Application {
         } else {
             logger.info("Loading history from configuration");
             HISTORY.fromList(Utils.getConfigList("download.history"));
-            if (HISTORY.toList().isEmpty()) {
+            if (HISTORY.isEmpty()) {
                 // Loaded from config, still no entries.
                 // Guess rip history based on rip folder
                 String[] dirs = Utils.getWorkingDirectory().list((dir, file) -> new File(dir.getAbsolutePath() + File.separator + file).isDirectory());
